@@ -1,20 +1,22 @@
-## Problem Request & Approach
-**Request:**  
-The task was to develop a complete planning stack for the spaceship agent that operates in closed-loop with a simulator. At each simulation step, the agent receives observations (including its own state and that of obstacles) and must output appropriate actuation commands. Key challenges include:
-- **Path Planning:** Determining a safe and efficient trajectory to avoid obstacles such as planets and satellites.
-- **Dynamic Constraints:** Respecting the spaceship's dynamics, including limited thrust, restricted thruster angles, and physical constraints like fuel usage and mass limits.
-- **Integration:** Maintaining the existing Agent interface so that the planner works seamlessly with the simulator.
 
-**Approach:**  
-To solve the problem, we experimented with a sequential convexification (SCvx) approach – a method inspired by techniques used in advanced aerospace applications. This allowed us to:
-- Linearize the nonlinear spaceship dynamics around a reference trajectory.
-- Iteratively optimize the trajectory while satisfying various constraints (initial/final state, collision avoidance, and control limits).
-- Evaluate the quality of the solution based on efficiency, fuel consumption, and safety metrics.
+# Spaceship trajectory planning via SCvx
+
+## Project Overview
+This project implements a robust planning and control stack for a spaceship agent operating in a 2D environment. The objective is to navigate through cluttered environments containing both static obstacles (planets) and dynamic "threats" (satellites) to reach a target state or perform a precise docking maneuver.
+
+The core of the adopted solution is a **Sequential Convex Programming (SCP)** algorithm, specifically **SCvx** [^1].
+
+## Problem Formulation
+The spaceship is modeled as a rigid body controlled by a single gimbaled thruster. The system dynamics are non-linear, governed by:
+- **State Space:** $X = [x, y, \psi, v_x, v_y, \dot{\psi}, \delta, m]^T$ representing position, orientation, linear/angular velocities, thruster angle, and fuel mass.
+- **Control Inputs:** $U = [F_{thrust}, \dot{\delta}]^T$ representing thrust force and gimbal angular rate.
+- **Constraints:**
+  - **Actuation Limits:** Bounded thrust magnitude and gimbal angle.
+  - **Dynamics:** Newtonian physics including mass depletion.
+  - **Safety:** Hard collision avoidance constraints for planets and moving satellites.
+  - **Terminal Conditions:** position, velocity, and orientation targets (for docking).
 
 ## Demonstration
-Below are two key visualizations from the project. The videos illustrate two important scenarios:
-- **Planetary Navigation:** Avoiding fixed obstacles (planets) while reaching the goal.
-- **Satellite Avoidance:** Navigating around moving satellites.
 
 <table>
   <tr>
@@ -34,3 +36,8 @@ Below are two key visualizations from the project. The videos illustrate two imp
     </td>
   </tr>
 </table>
+
+## Files
+- `src/pdm4ar/exercises/ex11/planner.py`: Implementation of the `SpaceshipPlanner` class, A* initialization, and the SCvx loop.
+- `src/pdm4ar/exercises/ex11/discretization.py`: Methods for ZOH and FOH discretization of dynamics.
+[^1]: Danylo Malyuta et al.,  "Convex Optimization for Trajectory Generation", 2021, doi: [10.1109/MCS.2022.3187542](https://arxiv.org/abs/2106.09125)
